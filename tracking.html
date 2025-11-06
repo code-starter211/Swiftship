@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SwiftShip Tracking Details</title>
+<style>
+body { font-family: 'Segoe UI', sans-serif; background:#f8f9fa; margin:0; padding:0; color:#333; }
+.container { max-width:900px; margin:100px auto; background:#fff; padding:2rem; border-radius:10px; box-shadow:0 5px 15px rgba(0,0,0,0.1); }
+h1 { text-align:center; color:#0066cc; margin-bottom:1rem; }
+.shipment-info { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:1.5rem; margin:2rem 0; padding:1.5rem; background:#f8f9fa; border-radius:8px; }
+.info-item { display:flex; flex-direction:column; }
+.info-label { font-size:0.85rem; color:#666; margin-bottom:0.3rem; }
+.info-value { font-size:1rem; font-weight:bold; color:#333; }
+.tracking-progress { margin-top:2rem; }
+.progress-title { font-size:1.3rem; color:#0066cc; margin-bottom:2rem; text-align:center; }
+.progress-container { position:relative; display:flex; justify-content:space-between; margin:3rem 0; }
+.progress-line { position:absolute; top:20px; left:0; right:0; height:4px; background:#e0e0e0; z-index:1; }
+.progress-line-fill { position:absolute; top:0; left:0; height:100%; background:#0066cc; transition:width 2s ease; z-index:2; }
+.progress-step { display:flex; flex-direction:column; align-items:center; z-index:3; position:relative; flex:1; }
+.step-circle { width:40px; height:40px; border-radius:50%; background:#e0e0e0; display:flex; align-items:center; justify-content:center; font-weight:bold; color:white; transition:all 0.5s ease; margin-bottom:0.5rem; }
+.step-circle.active { background:#0066cc; transform:scale(1.1); }
+.step-circle.completed { background:#28a745; }
+.step-label { font-size:0.85rem; font-weight:500; color:#666; text-align:center; max-width:100px; }
+.step-label.active { color:#0066cc; font-weight:bold; }
+.step-time { font-size:0.75rem; color:#999; margin-top:0.3rem; }
+.back-btn { display:block; width:fit-content; margin:2rem auto 0 auto; padding:0.8rem 2rem; background:#0066cc; color:#fff; text-decoration:none; border-radius:5px; text-align:center; font-weight:bold; transition:background 0.3s; }
+.back-btn:hover { background:#0052a3; }
+.not-found { text-align:center; font-size:1.2rem; color:red; margin-top:2rem; }
+@media(max-width:768px){ .shipment-info{ grid-template-columns:1fr; } }
+</style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Shipment Tracking Details</h1>
+
+    <div id="tracking-section">
+        <!-- Shipment info will be injected here -->
+    </div>
+
+    <a href="index.html" class="back-btn">Back to Home</a>
+</div>
+
+<script>
+const shipments = {
+    "SS987654320": {
+        service: "Express Delivery",
+        origin: "Uptown, NY",
+        destination: "Los Angeles, CA",
+        weight: "10 lbs",
+        delivery: "2025-11-10",
+        stage: 2, // Current stage
+        status: "On Hold",   // Custom status
+        holdStage: 2      // Stage where it was put on hold
+      
+    },
+    "SS987654321": {
+        service: "Freight Service",
+        origin: "Chicago, IL",
+        destination: "Houston, TX",
+        weight: "35 lbs",
+        delivery: "2025-11-12",
+        stage: 2
+    },
+    "SS555555555": {
+        service: "International Shipping",
+        origin: "Miami, FL",
+        destination: "London, UK",
+        weight: "15 lbs",
+        delivery: "2025-11-15",
+        stage: 1
+    }
+};
+
+function getQueryParam(param) {
+    const urlParams = new URLSearchParams(window.location.search);
+    return urlParams.get(param);
+}
+
+function displayShipment(trackingNumber) {
+    const shipment = shipments[trackingNumber];
+    const container = document.getElementById('tracking-section');
+
+    if (!shipment) {
+        container.innerHTML = `<p class="not-found">Tracking number not found. Please check and try again.</p>`;
+        return;
+    }
+
+    container.innerHTML = `
+    <div class="shipment-info">
+        <div class="info-item"><span class="info-label">Tracking Number</span><span class="info-value">${trackingNumber}</span></div>
+        <div class="info-item"><span class="info-label">Service Type</span><span class="info-value">${shipment.service}</span></div>
+        <div class="info-item"><span class="info-label">Origin</span><span class="info-value">${shipment.origin}</span></div>
+        <div class="info-item"><span class="info-label">Destination</span><span class="info-value">${shipment.destination}</span></div>
+        <div class="info-item"><span class="info-label">Weight</span><span class="info-value">${shipment.weight}</span></div>
+        <div class="info-item"><span class="info-label">Est. Delivery</span><span class="info-value">${shipment.delivery}</span></div>
+    </div>
+
+    <div class="tracking-progress">
+        <h3 class="progress-title">Package Journey</h3>
+        <div class="progress-container">
+            <div class="progress-line"><div class="progress-line-fill" id="progress-fill"></div></div>
+            ${["Processing","On the Way","Out for Delivery","Delivered"].map((label,i)=>`
+            <div class="progress-step">
+                <div class="step-circle" id="step${i+1}">${i+1}</div>
+                <div class="step-label" id="label${i+1}">${label}</div>
+                <div class="step-time" id="time${i+1}"></div>
+            </div>`).join('')}
+        </div>
+    </div>
+    `;
+
+    // Update stages
+    for (let i=1; i<=4; i++) {
+        const circle = document.getElementById('step'+i);
+        const label = document.getElementById('label'+i);
+        const time = document.getElementById('time'+i);
+
+        if(shipment.status === "On Hold" && i === shipment.holdStage) {
+            circle.classList.add('active');
+            circle.style.background = 'orange';
+            label.classList.add('active');
+            time.textContent = "On Hold";
+        } else if(i < shipment.stage){
+            circle.classList.add('completed');
+            circle.textContent = '✓';
+            time.textContent = 'Completed';
+        } else if(i === shipment.stage){
+            circle.classList.add('active');
+            label.classList.add('active');
+            time.textContent = shipment.status === "On Hold" ? "On Hold" : "In Progress";
+            if(shipment.status === "On Hold") circle.style.background = 'orange';
+        } else {
+            circle.textContent = i;
+            time.textContent = 'Pending';
+        }
+    }
+
+    // Update progress fill
+    if(shipment.status === "On Hold") {
+        document.getElementById('progress-fill').style.width = ((shipment.holdStage-1)/3)*100 + '%';
+    } else {
+        document.getElementById('progress-fill').style.width = ((shipment.stage-1)/3)*100 + '%';
+    }
+}
+
+const trackingNumber = getQueryParam('tracking');
+if(trackingNumber) displayShipment(trackingNumber);
+else document.getElementById('tracking-section').innerHTML = '<p class="not-found">No tracking number provided.</p>';
+</script>
+
+</body>
+</html>
