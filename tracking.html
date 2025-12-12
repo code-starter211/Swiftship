@@ -21,13 +21,34 @@ h1 { text-align:center; color:#0066cc; margin-bottom:1rem; }
 .step-circle { width:40px; height:40px; border-radius:50%; background:#e0e0e0; display:flex; align-items:center; justify-content:center; font-weight:bold; color:white; transition:all 0.5s ease; margin-bottom:0.5rem; }
 .step-circle.active { background:#0066cc; transform:scale(1.1); }
 .step-circle.completed { background:#28a745; }
+.step-circle.blinking { 
+    animation: blink 2s infinite; 
+    box-shadow: 0 0 10px rgba(0, 102, 204, 0.7);
+}
 .step-label { font-size:0.85rem; font-weight:500; color:#666; text-align:center; max-width:100px; }
 .step-label.active { color:#0066cc; font-weight:bold; }
 .step-time { font-size:0.75rem; color:#999; margin-top:0.3rem; }
 .back-btn { display:block; width:fit-content; margin:2rem auto 0 auto; padding:0.8rem 2rem; background:#0066cc; color:#fff; text-decoration:none; border-radius:5px; text-align:center; font-weight:bold; transition:background 0.3s; }
 .back-btn:hover { background:#0052a3; }
 .not-found { text-align:center; font-size:1.2rem; color:red; margin-top:2rem; }
-@media(max-width:768px){ .shipment-info{ grid-template-columns:1fr; } }
+.package-content { margin:1.5rem 0; padding:1.5rem; background:#f8f9fa; border-radius:8px; }
+.package-title { font-size:1.1rem; color:#0066cc; margin-bottom:1rem; font-weight:bold; }
+.content-items { display:grid; grid-template-columns:repeat(auto-fit,minmax(250px,1fr)); gap:1rem; }
+.content-item { display:flex; justify-content:space-between; padding:0.5rem 0; border-bottom:1px solid #e0e0e0; }
+.content-item:last-child { border-bottom:none; }
+.item-name { font-weight:500; }
+.item-qty { color:#666; }
+
+@keyframes blink {
+    0% { opacity: 1; transform: scale(1.1); }
+    50% { opacity: 0.7; transform: scale(1.05); }
+    100% { opacity: 1; transform: scale(1.1); }
+}
+
+@media(max-width:768px){ 
+    .shipment-info{ grid-template-columns:1fr; } 
+    .content-items { grid-template-columns:1fr; }
+}
 </style>
 </head>
 <body>
@@ -50,26 +71,156 @@ const shipments = {
         destination: "Anderson, IN",
         weight: "35 lbs",
         delivery: "2025-11-10",
-        stage: 2, // Current stage
-        status: "On Hold",   // Custom status
-        holdStage: 2      // Stage where it was put on hold
-      
+        stage: 3,
+        status: "On Hold",
+        holdStage: 3,
+        contents: [
+            { name: "Facebook Package", quantity: 1 },
+
+        ]
     },
+    
+        "SS777888999": {
+        service: "Express Delivery",
+        origin: "Seattle, WA",
+        destination: "Portland, OR",
+        weight: "8 lbs",
+        delivery: "2025-11-09",
+        stage: 3,
+        status: "",
+        contents: [
+            { name: "Facebook Package", quantity: 1 },
+
+        ]
+    },
+    
+    
     "SS98765432111": {
         service: "Express Delivery",
-        origin: "California",
-        destination: "Florida",
+        origin: "Washington",
+        destination: "Alabama",
         weight: "35 lbs",
-        delivery: "2025-11-13",
-        stage: 2
+        delivery: "2025-12-14",
+        stage: 2,
+        status: "In Transit",
+        contents: [
+            { name: "FBI Parcel", quantity: 1 },
+
+        ]
     },
+    
+    
+        
+    "SS987654321110": {
+        service: "Express Delivery",
+        origin: "California",
+        destination: "Poland",
+        weight: "35 lbs",
+        delivery: "2025-12-14",
+        stage: 2,
+        status: "In Transit",
+        contents: [
+            { name: "Facebook Package", quantity: 1 },
+
+        ]
+    },
+    
+    
     "SS555555555": {
         service: "International Shipping",
         origin: "Miami, FL",
         destination: "London, UK",
         weight: "15 lbs",
         delivery: "2025-11-15",
-        stage: 1
+        stage: 1,
+        status: "Processing",
+        contents: [
+            { name: "Designer Handbag", quantity: 1 },
+            { name: "Leather Wallet", quantity: 1 }
+        ]
+    },
+    "SS123456789": {
+        service: "Standard Ground",
+        origin: "New York, NY",
+        destination: "Chicago, IL",
+        weight: "22 lbs",
+        delivery: "2025-11-08",
+        stage: 4,
+        status: "Delivered",
+        contents: [
+            { name: "Books", quantity: 5 },
+            { name: "Office Supplies", quantity: 1 },
+            { name: "Stationery Set", quantity: 1 }
+        ]
+    },
+    "SS777888999": {
+        service: "Express Delivery",
+        origin: "Seattle, WA",
+        destination: "Portland, OR",
+        weight: "8 lbs",
+        delivery: "2025-11-09",
+        stage: 3,
+        status: "Processing",
+        contents: [
+            { name: "Facebook Package", quantity: 1 },
+
+        ]
+    },
+    "SS444333222": {
+        service: "Overnight Shipping",
+        origin: "Dallas, TX",
+        destination: "Atlanta, GA",
+        weight: "12 lbs",
+        delivery: "2025-11-07",
+        stage: 1,
+        status: "Processing",
+        contents: [
+            { name: "Important Documents", quantity: 1 },
+            { name: "Contract Files", quantity: 3 }
+        ]
+    },
+    "SS111222333": {
+        service: "International Shipping",
+        origin: "Los Angeles, CA",
+        destination: "Tokyo, Japan",
+        weight: "45 lbs",
+        delivery: "2025-11-20",
+        stage: 2,
+        status: "In Transit",
+        contents: [
+            { name: "Camera Equipment", quantity: 1 },
+            { name: "Camera Lenses", quantity: 3 },
+            { name: "Tripod", quantity: 1 },
+            { name: "Camera Bag", quantity: 1 }
+        ]
+    },
+    "SS666777888": {
+        service: "Same Day Delivery",
+        origin: "Boston, MA",
+        destination: "Philadelphia, PA",
+        weight: "5 lbs",
+        delivery: "2025-11-06",
+        stage: 2,
+        status: "On Hold",
+        holdStage: 2,
+        contents: [
+            { name: "Medical Supplies", quantity: 1 },
+            { name: "Prescription Medication", quantity: 2 }
+        ]
+    },
+    "SS999000111": {
+        service: "Freight Shipping",
+        origin: "Denver, CO",
+        destination: "Houston, TX",
+        weight: "150 lbs",
+        delivery: "2025-11-18",
+        stage: 1,
+        status: "Processing",
+        contents: [
+            { name: "Furniture Pieces", quantity: 3 },
+            { name: "Home Decor", quantity: 5 },
+            { name: "Lighting Fixtures", quantity: 2 }
+        ]
     }
 };
 
@@ -87,6 +238,21 @@ function displayShipment(trackingNumber) {
         return;
     }
 
+    // Generate package content HTML if contents exist
+    const packageContentHTML = shipment.contents ? `
+        <div class="package-content">
+            <div class="package-title">Package Contents</div>
+            <div class="content-items">
+                ${shipment.contents.map(item => `
+                    <div class="content-item">
+                        <span class="item-name">${item.name}</span>
+                        <span class="item-qty">Qty: ${item.quantity}</span>
+                    </div>
+                `).join('')}
+            </div>
+        </div>
+    ` : '';
+
     container.innerHTML = `
     <div class="shipment-info">
         <div class="info-item"><span class="info-label">Tracking Number</span><span class="info-value">${trackingNumber}</span></div>
@@ -96,6 +262,8 @@ function displayShipment(trackingNumber) {
         <div class="info-item"><span class="info-label">Weight</span><span class="info-value">${shipment.weight}</span></div>
         <div class="info-item"><span class="info-label">Est. Delivery</span><span class="info-value">${shipment.delivery}</span></div>
     </div>
+
+    ${packageContentHTML}
 
     <div class="tracking-progress">
         <h3 class="progress-title">Package Journey</h3>
@@ -117,8 +285,11 @@ function displayShipment(trackingNumber) {
         const label = document.getElementById('label'+i);
         const time = document.getElementById('time'+i);
 
-        if(shipment.status === "On Hold" && i === shipment.holdStage) {
-            circle.classList.add('active');
+        // Add default status if not provided
+        const currentStatus = shipment.status || "In Transit";
+        
+        if(currentStatus === "On Hold" && i === shipment.holdStage) {
+            circle.classList.add('active', 'blinking');
             circle.style.background = 'orange';
             label.classList.add('active');
             time.textContent = "On Hold";
@@ -127,10 +298,10 @@ function displayShipment(trackingNumber) {
             circle.textContent = '✓';
             time.textContent = 'Completed';
         } else if(i === shipment.stage){
-            circle.classList.add('active');
+            circle.classList.add('active', 'blinking');
             label.classList.add('active');
-            time.textContent = shipment.status === "On Hold" ? "On Hold" : "In Progress";
-            if(shipment.status === "On Hold") circle.style.background = 'orange';
+            time.textContent = currentStatus === "On Hold" ? "On Hold" : currentStatus;
+            if(currentStatus === "On Hold") circle.style.background = 'orange';
         } else {
             circle.textContent = i;
             time.textContent = 'Pending';
